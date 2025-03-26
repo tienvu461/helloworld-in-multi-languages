@@ -38,7 +38,7 @@ jobs:
       - name: Build and cache Docker images
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./nodejs
           file: ./nodejs/Dockerfile
           push: false
           tags: himl:nodejs-latest
