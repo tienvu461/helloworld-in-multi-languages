@@ -1,0 +1,47 @@
+name: Build image for HIML
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - githubaction-caching
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      repository-projects: write
+      contents: write
+      id-token: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 400
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+      -
+        name: Login to ECR
+        uses: docker/login-action@v3
+        with:
+          registry: 372467991812.dkr.ecr.ap-southeast-1.amazonaws.com
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and cache Docker images
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./nodejs/Dockerfile
+          push: false
+          tags: himl:nodejs-latest
+          # cache-from: type=local,src=/tmp/.buildx-cache
+          # cache-to: type=local,dest=/tmp/.buildx-cache,new=true
+
